@@ -61,9 +61,17 @@ We will ask:
 - How would you make this kind of review repeatable for a teammate?
 - What part of it would you automate, and what would you always keep for a human?
 
-## Ground rules and handing in
+## Ground rules
 
 - Do not paste this code into tools that train on your data.
-- You may change any file on a PR branch. Do not change `main`.
-- At the end, push your branches (if you are working from GitHub) or zip the whole `uag-service`
-  folder, including the hidden `.git` folder, and send it to us.
+- Work in your local clone. Commit your fixes on the PR branches there (`pr-101-shipment-alerts`,
+  `pr-102-bulk-move`). Do not change `main`.
+- Do not open pull requests, issues or comments on this repository, and do not push to it.
+
+## Handing in
+
+At the end, send us your work in one of these ways:
+
+- **Zip (preferred):** zip your whole local folder, including the hidden `.git` folder, and email it to us.
+- **Your own fork:** fork this repository, push your two PR branches to your fork, and send us the
+  link. Do not open a pull request against this repository.
