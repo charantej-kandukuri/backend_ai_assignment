@@ -1,0 +1,14 @@
+{
+  "name": "uag-service",
+  "version": "1.0.0",
+  "description": "Shipment access control for a multi-company platform: groups, permissions and tags.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/"
+  }
+}
