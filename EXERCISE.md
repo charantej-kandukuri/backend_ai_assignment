@@ -1,6 +1,6 @@
 # Live exercise: review and fix with AI
 
-**Time:** 10 minutes on your own before the session, then 45 minutes live, screen shared.
+**Time:** 45 minutes, live, screen shared.
 **AI tools:** required. Use whatever you normally use (Claude, ChatGPT, Copilot, Cursor, Claude Code, anything).
 
 ## The situation
@@ -13,21 +13,20 @@ Your job is to decide whether each is safe to merge and, if not, fix it.
 
 | When | What |
 | --- | --- |
-| Before the session | Get oriented on your own (about 10 minutes) |
-| 0-25 min | Review and fix both PRs, **PR-102 first** |
-| 25-38 min | Adapt to a change (we will explain it at the time) |
+| 0-7 min | Get oriented |
+| 7-27 min | Review and fix both PRs, **PR-102 first** |
+| 27-38 min | Adapt to a change (we will explain it at the time) |
 | 38-45 min | Wrap-up questions |
 
-## Before the session: get oriented (about 10 minutes)
+## Get oriented (about 7 minutes)
 
 1. Read [docs/DOMAIN.md](docs/DOMAIN.md), especially **Requirements**. It is short.
 2. Skim [README.md](README.md) for the code layout and the fixture users.
 3. Run `npm test` on `main`.
 
-Please do not review the PRs before the session. Using AI to get oriented is fine; we may ask
-what you asked it.
+Using AI to get oriented is fine. Tell us what you asked it.
 
-## Review and fix (about 25 minutes)
+## Review and fix (about 20 minutes)
 
 Do **PR-102 first**, then PR-101.
 
@@ -50,8 +49,9 @@ Talk us through it as you go: what you ask the AI, what you accept, what you rej
 
 ## Adapt to a change (about 10 minutes)
 
-Requirements change during real work. Around the 25-minute mark we will tell you about a
-change, even if you have not finished both PRs. Update your code and tests for it, the same way: explain, test, fix, commit.
+Requirements change during real work. Around the 27-minute mark we will tell you about a
+change, even if you have not finished both PRs. Finishing PR-102 well matters more than
+starting PR-101. Update your code and tests for it, the same way: explain, test, fix, commit.
 
 ## Wrap-up (5 minutes)
 
