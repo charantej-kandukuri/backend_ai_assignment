@@ -1,5 +1,5 @@
 // Moving users between groups. See docs/DOMAIN.md.
-import { withTransaction, forbidden, notFound, conflict } from './store.js';
+import { withTransaction, forbidden, notFound, conflict, AccessError } from './store.js';
 import { resolvePermissions, can, membership, activeAssignment, getGroup } from './permissions.js';
 
 export function ownerCount(store, orgId) {
@@ -57,31 +57,17 @@ export function moveUsers(store, { actorId, orgId, groupId, userIds }) {
     throw forbidden('Only owners can make someone an owner.');
   }
 
-  const owners = ownerCount(store, orgId);
+  // Each user goes through changeGroup, so the owner count is re-checked after every
+  // move and each change gets its own audit entry with the previous group.
   const results = [];
-
   for (const userId of new Set(userIds)) {
-    if (!membership(store, userId, orgId)) {
-      results.push({ userId, ok: false, error: 'not_found' });
-      continue;
-    }
-    const current = activeAssignment(store, userId, orgId);
-    if (current?.group_id === groupId) {
+    try {
+      changeGroup(store, { actorId, orgId, groupId, userId });
       results.push({ userId, ok: true });
-      continue;
+    } catch (err) {
+      if (!(err instanceof AccessError)) throw err;
+      results.push({ userId, ok: false, error: err.code });
     }
-    if (current) {
-      const currentGroup = getGroup(store, orgId, current.group_id);
-      if (currentGroup?.system_key === 'owner' && owners <= 1) {
-        results.push({ userId, ok: false, error: 'last_owner' });
-        continue;
-      }
-      current.deleted = true;
-    }
-    store.assignments.push({ org_id: orgId, user_id: userId, group_id: groupId, deleted: false, created_by: actorId });
-    results.push({ userId, ok: true });
   }
-
-  store.audit_log.push({ org_id: orgId, actor_id: actorId, action: 'bulk_move', to: groupId, results });
   return results;
 }
