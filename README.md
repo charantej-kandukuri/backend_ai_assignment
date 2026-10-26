@@ -55,3 +55,6 @@ curl -H "x-user-id: cara" http://localhost:3000/orgs/acme/shipments
 | shp-4 | globex | `tag-north` (North) |
 
 `2-8C` is a storage temperature range (2 to 8 °C), a common requirement for medicines.
+
+## Requirement update
+Either all users are moved from one group to other or none of them users are migrated.

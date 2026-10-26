@@ -4,15 +4,27 @@ import { createStore } from '../src/store.js';
 import { moveUsers, ownerCount } from '../src/members.js';
 import { activeAssignment } from '../src/permissions.js';
 
-test('bulk move reports a result per user', () => {
+test('bulk move moves every user when all succeed', () => {
   const store = createStore();
-  const results = moveUsers(store, { actorId: 'bob', orgId: 'acme', groupId: 'acme:eu-ops', userIds: ['erin', 'max', 'nobody'] });
+  const results = moveUsers(store, { actorId: 'bob', orgId: 'acme', groupId: 'acme:eu-ops', userIds: ['erin', 'max'] });
   assert.deepEqual(results, [
     { userId: 'erin', ok: true },
     { userId: 'max', ok: true },
-    { userId: 'nobody', ok: false, error: 'not_found' },
   ]);
   assert.equal(activeAssignment(store, 'erin', 'acme').group_id, 'acme:eu-ops');
+  assert.equal(activeAssignment(store, 'max', 'acme').group_id, 'acme:eu-ops');
+});
+
+test('bulk move moves nobody if any user fails, and reports why', () => {
+  const store = createStore();
+  const before = structuredClone(store);
+  const results = moveUsers(store, { actorId: 'bob', orgId: 'acme', groupId: 'acme:eu-ops', userIds: ['erin', 'max', 'nobody'] });
+  assert.deepEqual(results, [
+    { userId: 'erin', ok: false, error: 'rolled_back' },
+    { userId: 'max', ok: false, error: 'rolled_back' },
+    { userId: 'nobody', ok: false, error: 'not_found' },
+  ]);
+  assert.deepEqual(store, before);
 });
 
 test('bulk move keeps the last owner', () => {
@@ -26,16 +38,16 @@ test('bulk move cannot remove every owner at once', () => {
   const store = createStore();
   const results = moveUsers(store, { actorId: 'alice', orgId: 'acme', groupId: 'acme:admin', userIds: ['alice', 'olga'] });
   assert.deepEqual(results, [
-    { userId: 'alice', ok: true },
+    { userId: 'alice', ok: false, error: 'rolled_back' },
     { userId: 'olga', ok: false, error: 'last_owner' },
   ]);
-  assert.equal(ownerCount(store, 'acme'), 1);
-  assert.equal(activeAssignment(store, 'olga', 'acme').group_id, 'acme:owner');
+  assert.equal(ownerCount(store, 'acme'), 2);
+  assert.equal(activeAssignment(store, 'alice', 'acme').group_id, 'acme:owner');
 });
 
 test('bulk move audits each user with their previous group', () => {
   const store = createStore();
-  moveUsers(store, { actorId: 'bob', orgId: 'acme', groupId: 'acme:viewer', userIds: ['cara', 'erin', 'max', 'nobody'] });
+  moveUsers(store, { actorId: 'bob', orgId: 'acme', groupId: 'acme:viewer', userIds: ['cara', 'erin', 'max'] });
   assert.deepEqual(store.audit_log, [
     { org_id: 'acme', actor_id: 'bob', user_id: 'cara', from: 'acme:eu-ops', to: 'acme:viewer' },
     { org_id: 'acme', actor_id: 'bob', user_id: 'erin', from: null, to: 'acme:viewer' },

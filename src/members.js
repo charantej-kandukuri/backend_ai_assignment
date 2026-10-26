@@ -59,15 +59,25 @@ export function moveUsers(store, { actorId, orgId, groupId, userIds }) {
 
   // Each user goes through changeGroup, so the owner count is re-checked after every
   // move and each change gets its own audit entry with the previous group.
+  // All or nothing: if any user fails, every move and audit entry is rolled back.
   const results = [];
-  for (const userId of new Set(userIds)) {
-    try {
-      changeGroup(store, { actorId, orgId, groupId, userId });
-      results.push({ userId, ok: true });
-    } catch (err) {
-      if (!(err instanceof AccessError)) throw err;
-      results.push({ userId, ok: false, error: err.code });
-    }
+  const rollback = new Error('bulk move rolled back');
+  try {
+    withTransaction(store, () => {
+      for (const userId of new Set(userIds)) {
+        try {
+          changeGroup(store, { actorId, orgId, groupId, userId });
+          results.push({ userId, ok: true });
+        } catch (err) {
+          if (!(err instanceof AccessError)) throw err;
+          results.push({ userId, ok: false, error: err.code });
+        }
+      }
+      if (results.some((r) => !r.ok)) throw rollback;
+    });
+  } catch (err) {
+    if (err !== rollback) throw err;
+    return results.map((r) => (r.ok ? { userId: r.userId, ok: false, error: 'rolled_back' } : r));
   }
   return results;
 }
